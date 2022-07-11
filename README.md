@@ -34,7 +34,7 @@ provider "google" {
 #Basic use of this module:
 
 module "cloud_storage" {
-  source     = "OT-CLOUD-KIT/gcp/storage"
+  source     = "OT-CLOUD-KIT/storage/gcp"
   prefix     = "opstree-"
   location   = "<bucket location>"
 
