@@ -34,17 +34,17 @@ provider "google" {
 #Basic use of this module:
 
 module "cloud_storage" {
-  source     = "./storage"
+  source     = "OT-CLOUD-KIT/gcp/storage"
   prefix     = "opstree-"
   location   = "<bucket location>"
 
   names = ["dev", "qa"]
   bucket_policy_only = {
-    "one" = true
-    "two" = false
+    "dev" = false
+    "qa"  = true
   }
   folders = {
-    "two" = ["test1", "test2"]
+    "dev" = ["test1", "test2"]
   }
 
   lifecycle_rules = [{
