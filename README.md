@@ -49,7 +49,6 @@ module "cloud_storage" {
 
   lifecycle_rules = [{
     action = {
-    action = {
       type = "Delete"
     }
     condition = {
