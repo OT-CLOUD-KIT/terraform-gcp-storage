@@ -1,95 +1,102 @@
-variable "prefix" {
-  description = "Prefix used to generate the bucket name."
+variable "bucket_name" {
+  description = "Name of the GCS bucket."
   type        = string
-}
-
-variable "names" {
-  description = "Bucket name suffixes."
-  type        = list(string)
-}
-
-variable "randomize_suffix" {
-  description = "Adds an identical, but randomized 2-character suffix to all bucket names"
-  type        = bool
-  default     = false
 }
 
 variable "location" {
-  description = "Bucket location."
+  description = "Location for the GCS bucket."
   type        = string
 }
 
+variable "project_id" {
+  description = "GCP project ID."
+  type        = string
+}
+
+variable "force_destroy" {
+  description = "Force destroy the bucket even if it contains objects."
+  type        = bool
+  default     = true
+}
+
+variable "versioning" {
+  description = "Enable versioning for the bucket."
+  type        = bool
+  default     = true
+}
+
+variable "uniform_access" {
+  description = "Enable uniform bucket-level access."
+  type        = bool
+  default     = true
+}
+
+variable "labels" {
+  description = "Labels to apply to the bucket."
+  type        = map(string)
+  default     = {}
+}
+
+variable "log_bucket" {
+  description = "Bucket to store access logs."
+  type        = string
+  default     = null
+}
+
+variable "log_object_prefix" {
+  description = "Prefix for log object names."
+  type        = string
+  default     = null
+}
+
+variable "lifecycle_age" {
+  description = "Number of days after which to delete objects."
+  type        = number
+  default     = 30
+}
+
+variable "kms_key_name" {
+  description = "Optional KMS key for encryption."
+  type        = string
+  default     = null
+}
+
+variable "retention_period" {
+  description = "Retention period for objects in seconds."
+  type        = number
+  default     = 60
+}
+
 variable "storage_class" {
-  description = "Bucket storage class."
+  description = "Storage class of the bucket."
   type        = string
   default     = "STANDARD"
 }
 
-variable "force_destroy" {
-  description = "Optional map of lowercase unprefixed name => boolean, defaults to false."
-  type        = map(bool)
-  default     = {}
+variable "objects" {
+  description = "List of object names to create inside the bucket."
+  type        = list(string)
 }
 
-variable "versioning" {
-  description = "Optional map of lowercase unprefixed name => boolean, defaults to false."
-  type        = map(bool)
-  default     = {}
+variable "empty_file_path" {
+  description = "Path to an empty or template file to upload."
+  type        = string
 }
 
-variable "encryption_key_names" {
-  description = "Optional map of lowercase unprefixed name => string, empty strings are ignored."
+variable "content_type" {
+  description = "Content-Type of uploaded objects."
+  type        = string
+  default     = "text/plain"
+}
+
+variable "cache_control" {
+  description = "Cache control settings for objects."
+  type        = string
+  default     = "no-cache"
+}
+
+variable "object_metadata" {
+  description = "Custom metadata to assign to each object."
   type        = map(string)
-  default     = {}
-}
-
-variable "bucket_policy_only" {
-  description = "Disable ad-hoc ACLs on specified buckets. Defaults to true. Map of lowercase unprefixed name => boolean"
-  type        = map(bool)
-  default     = {}
-}
-
-variable "labels" {
-  description = "Labels to be attached to the buckets"
-  type        = map(string)
-  default     = {}
-}
-
-variable "folders" {
-  description = "Map of lowercase unprefixed name => list of top level folder objects."
-  type        = map(list(string))
-  default     = {}
-}
-
-variable "lifecycle_rules" {
-  type = set(object({
-    action = map(string)
-    condition = map(string)
-  }))
-  description = "List of lifecycle rules to configure. Format is the same as described in provider documentation https://www.terraform.io/docs/providers/google/r/storage_bucket.html#lifecycle_rule except condition.matches_storage_class should be a comma delimited string."
-  default     = []
-}
-
-variable "cors" {
-  description = "Set of maps of mixed type attributes for CORS values. See appropriate attribute types here: https://www.terraform.io/docs/providers/google/r/storage_bucket.html#cors"
-  type        = set(any)
-  default     = []
-}
-
-variable "website" {
-  type        = map(any)
-  default     = {}
-  description = "Map of website values. Supported attributes: main_page_suffix, not_found_page"
-}
-
-variable "retention_policy" {
-  type        = any
-  default     = {}
-  description = "Map of retention policy values. Format is the same as described in provider documentation https://www.terraform.io/docs/providers/google/r/storage_bucket#retention_policy"
-}
-
-variable "logging" {
-  description = "Map of lowercase unprefixed name => bucket logging config object. Format is the same as described in provider documentation https://www.terraform.io/docs/providers/google/r/storage_bucket.html#logging"
-  type        = any
   default     = {}
 }
