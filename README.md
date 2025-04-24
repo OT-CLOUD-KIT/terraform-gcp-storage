@@ -9,7 +9,7 @@ This Terraform configuration defines a Google Cloud Storage bucket with advanced
 
 ## Architecture
 
-<img width="6000" length="8000" alt="Terraform" src="https://github.com/user-attachments/assets/26c523f3-290d-4be9-bc8b-39fbca89478b">
+<img width="800" length="800" alt="Terraform" src="https://github.com/user-attachments/assets/805f3d68-5333-43bf-97be-1fd1a7fdffb8">
 
 
 ## Providers
