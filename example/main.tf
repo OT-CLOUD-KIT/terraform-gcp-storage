@@ -1,44 +1,21 @@
-terraform {
-  required_providers {
-    google = {
-      version = "~> 4.19.0"
-    }
-  }
-  required_version = "~>1.1.3"
-}
-
-# Configure the GCP Provider
-
-provider "google" {
-  credentials = file("<service_account_key_json/p12_file")
-  project     = "<project-id>"
-  region      = "<region>"
-}
-
-#Basic use of this module:
-
-module "cloud_storage" {
-  source     = "OT-CLOUD-KIT/storage/gcp"
-  prefix     = "opstree-"
-  location   = "uae"
-
-  names = ["dev", "qa"]
-  bucket_policy_only = {
-    "dev" = false
-    "qa"  = true
-  }
-  folders = {
-    "dev" = ["test1", "test2"]
-  }
-
-  lifecycle_rules = [{
-    action = {
-      type = "Delete"
-    }
-    condition = {
-      age                   = "730"
-      matches_storage_class = "STANDARD"
-      with_state = "ANY"
-    }
-  }]
+module "gcs_bucket" {
+  source            = "./module"
+  bucket_name       = var.bucket_name
+  location          = var.location
+  project_id        = var.project_id
+  force_destroy     = var.force_destroy
+  versioning        = var.versioning
+  uniform_access    = var.uniform_access
+  labels            = var.labels
+  log_bucket        = var.log_bucket
+  log_object_prefix = var.log_object_prefix
+  lifecycle_age     = var.lifecycle_age
+  kms_key_name      = var.kms_key_name
+  retention_period  = var.retention_period
+  storage_class     = var.storage_class
+  objects           = var.objects
+  empty_file_path   = var.empty_file_path
+  content_type      = var.content_type
+  cache_control     = var.cache_control
+  object_metadata   = var.object_metadata
 }

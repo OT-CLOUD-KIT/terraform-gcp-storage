@@ -1,98 +1,121 @@
-# GCP cloud Storage
+## Terraform GCP Cloud Storage
 
 [![Opstree Solutions][opstree_avatar]][opstree_homepage]<br/>[Opstree Solutions][opstree_homepage] 
 
   [opstree_homepage]: https://opstree.github.io/
   [opstree_avatar]: https://img.cloudposse.com/150x150/https://github.com/opstree.png
 
-  - This terraform module will create storage buckets.
-  - This project is a part of opstree's ot-gcp initiative for terraform modules.
+This Terraform configuration defines a Google Cloud Storage bucket with advanced settings like versioning, lifecycle rules, logging, uniform access, and optional encryption. It also creates multiple GCS objects with custom metadata and caching options using a single template file. Retention policies and public access prevention are enforced to enhance security and compliance.
 
-# Overview of GCP cloud storage
-Google Cloud Storage is an enterprise public cloud storage platform that can house large unstructured data sets. Companies can purchase the storage for primary or infrequently accessed data. Google Cloud Storage customers access their data through a web browser or command-line interface
+## Architecture
+
+<img width="800" length="800" alt="Terraform" src="https://github.com/user-attachments/assets/805f3d68-5333-43bf-97be-1fd1a7fdffb8">
+
+
+## Providers
+
+| Name                                              | Version  |
+|---------------------------------------------------|----------|
+| <a name="provider_gcp"></a> [gcp](#provider\_gcp) | 5.0.0   |
 
 ## Usage
 
+```hcl
+module "gcs_bucket" {
+  source            = "./module"
+  bucket_name       = var.bucket_name
+  location          = var.location
+  project_id        = var.project_id
+  force_destroy     = var.force_destroy
+  versioning        = var.versioning
+  uniform_access    = var.uniform_access
+  labels            = var.labels
+  log_bucket        = var.log_bucket
+  log_object_prefix = var.log_object_prefix
+  lifecycle_age     = var.lifecycle_age
+  kms_key_name      = var.kms_key_name
+  retention_period  = var.retention_period
+  storage_class     = var.storage_class
+  objects           = var.objects
+  empty_file_path   = var.empty_file_path
+  content_type      = var.content_type
+  cache_control     = var.cache_control
+  object_metadata   = var.object_metadata
+}
+
+# Variable values
+
+region = "us-central1"
+
+project_id = "nw-opstree-dev-landing-zone"
+
+bucket_name = "jaiswal-bucket"
+
+location = "US"
+
+versioning = true
+
+force_destroy = true
+
+objects = ["env/dev/network/tfstate", "env/dev/vm/tfstate"]
+
+empty_file_path = "blank.txt"
+
+uniform_access = true
+
+labels = {
+  env  = "dev"
+  team = "infra"
+}
+
+log_bucket = "gcs-log-bucket"
+
+log_object_prefix = "gcs-logs"
+
+lifecycle_age = 30
+
+kms_key_name = null
+
+retention_period = 30
+
+storage_class = "STANDARD"
+
+content_type = "text/plain"
+
+cache_control = "no-cache"
+
+object_metadata = {
+  owner = "devops"
+}
+
 ```
-terraform {
-  required_providers {
-    google = {
-      version = "~> 4.19.0"
-    }
-  }
-  required_version = "~>1.1.3"
-}
 
-# Configure the GCP Provider
+## Inputs
 
-provider "google" {
-  credentials = file("<service_account_key_json/p12_file")
-  project     = "<project-id>"
-  region      = "<region>"
-}
+| Name | Description | Type | Default | Required | 
+|------|-------------|:----:|---------|:--------:|
+|**project_id**| The ID of the project | string | { } | yes| 
+|**region**| Region where projects and folders will be created. | string | "us-central1" | yes | 
+|**bucket_name**| Name of the GCS bucket | string| { }| yes| 
+|**location**| Location for the GCS bucket | string | { } | yes | 
+|**force_destroy**| Force destroy the bucket even if it contains objects | bool | true | yes| 
+|**versioning**| Enable versioning for the bucket | bool | true | yes | 
+|**uniform_access**| Enable uniform bucket-level access | bool | true | yes| 
+|**labels**| Labels to apply to the bucket | map{string} | { } | yes | 
+|**log_bucket**| Bucket to store access logs | string | null | yes| 
+|**log_object_prefix**| Prefix for log object names | string | null | yes |
+|**lifecycle_age**| Number of days after which to delete objects | number | 30 | yes | 
+|**kms_key_name**| Optional KMS key for encryption | string| null | yes| 
+|**retention_period**| Retention period for objects in seconds | number | 60 | yes | 
+|**storage_class**| Storage class of the bucket | string | STANDARD | yes| 
+|**objects**| List of object names to create inside the bucket | list(string) | [ ] | yes | 
+|**empty_file_path**| Path to an empty or template file to upload | string | { } | yes| 
+|**content_type**| Content-Type of uploaded objects | string | "plain/text" | yes | 
+|**cache_control**| Bucket to store access logs | string | "no-cache" | yes| 
+|**object_metadata**| Custom metadata to assign to each object | map(string) | { } | yes |
 
-#Basic use of this module:
-
-module "cloud_storage" {
-  source     = "OT-CLOUD-KIT/storage/gcp"
-  prefix     = "opstree-"
-  location   = "<bucket location>"
-
-  names = ["dev", "qa"]
-  bucket_policy_only = {
-    "dev" = false
-    "qa"  = true
-  }
-  folders = {
-    "dev" = ["test1", "test2"]
-  }
-
-  lifecycle_rules = [{
-    action = {
-      type = "Delete"
-    }
-    condition = {
-      age                   = "730"
-      matches_storage_class = "STANDARD"
-      with_state = "ANY"
-    }
-  }]
-}
-
-```
-
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| prefix | Prefix used to generate the bucket name. | `string` | n/a | yes |
-| names | Bucket name suffixes. | `list(string)` | n/a | yes |
-| location | Bucket location. | `string` | n/a | no |
-| storage_class | Bucket storage class. | `string` | `STANDARD` | no |
-| force_destroy | Bucket storage class. | `bool` | `false` | no |
-| versioning | Optional map of lowercase unprefixed name => boolean, defaults to false. | `map(bool)` | `{}` | no |
-| encryption_key_names | The bucket's encryption configuration. | `map(string)` | n/a | no |
-| labels | Labels to be attached to the buckets | `map(string)` | `{}` | no |
-| folders | Map of lowercase unprefixed name => list of top level folder objects. | `map(list(string))` | `{}` | no |
-| lifecycle\_rules | List of lifecycle rules to configure.| `[]` | no |
-| cors | Set of maps of mixed type attributes for CORS values. | `set(any)` | `[]` | no |
-| website | Map of website values. Supported attributes: main\_page\_suffix, not\_found\_page | `map(any)` | `{}` | no |
-| retention\_policy | Map of retention policy values. | `any` | `{}` | no |
-| logging | Map of lowercase unprefixed name => bucket logging config object. | `any` | `{}` | no |
-
-
-## Outputs
-
+## Output
 | Name | Description |
 |------|-------------|
-| names | Bucket names. |
-| names\_list | List of bucket names. |
-| url | Bucket URL (for single use). |
-| urls | Bucket URLs. |
-| urls\_list | List of bucket URLs. |
-
-
-### Contributors
-
-[![Shweta Tyagi][shweta_avatar]][shweta_homepage]<br/>[Shweta Tyagi][shweta_homepage] 
-
-  [shweta_homepage]: https://github.com/shwetatyagi-ot
-  [shweta_avatar]: https://img.cloudposse.com/75x75/https://github.com/shwetatyagi-ot.png
+|**bucket_name**| Name of the bucket created | 
+|**bucket_url**| URL of the bucket | 
